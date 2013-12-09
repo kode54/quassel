@@ -84,6 +84,12 @@ bool MySqlStorage::initDbSession(QSqlDatabase &) {
   // moo
   QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
+  QSqlQuery query(logDb());
+  bool success = query.exec("SET NAMES utf8mb4");
+  if (!success) {
+    qWarning() << "MySqlStorage::initDbSession(QSqlDatabase): Failed to SET NAMES utf8mb4!";
+  }
+
   return true;
 }
 
