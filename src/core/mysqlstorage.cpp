@@ -80,9 +80,17 @@ QVariantMap MySqlStorage::setupDefaults() const {
   return map;
 }
 
-void MySqlStorage::initDbSession(QSqlDatabase &) {
+bool MySqlStorage::initDbSession(QSqlDatabase &db) {
   // moo
   QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
+
+  QSqlQuery query(db);
+  bool success = query.exec("SET NAMES utf8mb4");
+  if (!success) {
+    qWarning() << "MySqlStorage::initDbSession(QSqlDatabase): Failed to SET NAMES utf8mb4!";
+  }
+
+  return true;
 }
 
 void MySqlStorage::setConnectionProperties(const QVariantMap &properties) {
@@ -1458,15 +1466,15 @@ QSqlQuery MySqlStorage::prepareAndExecuteQuery(const QString &queryname, const Q
       field.clear();
     else
       field.setValue(value);
-    
-    name = QString("@a%1").arg(i);    
+
+    name = QString("@a%1").arg(i);
     param = driver->formatValue(field);
     db.exec(QString("SET %1 = %2").arg(name).arg(param));
     if (db.lastError().isValid()) {
       qWarning() << "MySqlStorage::executePreparedQuery() set parameter failed for name = " << name << " and param = " << param;
       return QSqlQuery(db);
     }
-    
+
     paramStrings << name;
   }
 
@@ -1494,7 +1502,7 @@ QSqlQuery MySqlStorage::prepareAndExecuteQuery(const QString &queryname, const Q
     } else {
       query = db.exec(QString("EXECUTE quassel_%1 USING %2").arg(queryname).arg(paramStrings.join(", ")));
     }
-    
+
     insertId = query.lastInsertId();
   } else {
     insertId = query.lastInsertId();
