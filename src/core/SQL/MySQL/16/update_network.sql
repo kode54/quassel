@@ -17,4 +17,4 @@ rejoinchannels = :rejoinchannels,
 usesasl = :usesasl,
 saslaccount = :saslaccount,
 saslpassword = :saslpassword
-WHERE networkid = :networkid
+WHERE userid = :userid AND networkid = :networkid
